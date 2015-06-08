@@ -15,35 +15,29 @@ private let imageViewHeight : CGFloat = 400
 
 class PhotoDetailViewController: UIViewController {
     var placeId: String!
-    var imageView: UIImageView!
-    private var placeDetailSearchQueries : [NSDictionary]!
-
+    private var imageView: UIImageView!
     
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        
     }
     
     required init() {
         super.init(nibName: nil, bundle: nil);
-        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Details"
         self.view.backgroundColor = UIColor.whiteColor()
-        //self.placeDetailSearchQueries = []
         
         imageView = UIImageView(frame: CGRectMake(imageViewX, imageViewY, imageViewWidth, imageViewHeight))
         imageView.backgroundColor = UIColor.grayColor()
         self.view.addSubview(imageView)
         getPhotoWithReference(self.placeId)
-        
     }
+    
     func load_image(urlString:String)
     {
-        
         var imgURL: NSURL! = NSURL(string: urlString)
         let request: NSURLRequest = NSURLRequest(URL: imgURL)
         NSURLConnection.sendAsynchronousRequest(
@@ -55,10 +49,9 @@ class PhotoDetailViewController: UIViewController {
         })
         
     }
+    
     func getPhotoWithReference(reference: String){
         self.retrieveGooglePlaceInformation(reference, completion: { (results) -> () in
-            
-
             if let photoDetails = results {
                 let photosArray : [NSDictionary]! = photoDetails["photos"] as? [NSDictionary]
                 if photosArray != nil {
@@ -71,16 +64,12 @@ class PhotoDetailViewController: UIViewController {
                 }
             }
         })
-
     }
     
     func retrieveGooglePlaceInformation(reference : String!, completion: (NSDictionary?) -> ()){
-        
-
         var urlString = "https://maps.googleapis.com/maps/api/place/details/json?reference=\(reference)&key=AIzaSyDZeZ2BweGVdUli7hSMfljgtAYQp4RAV5U"
         let url = NSURL(string: urlString.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!)
         let defaultConfigObject = NSURLSessionConfiguration.defaultSessionConfiguration()
-            
         let delegateFreeSession = NSURLSession(configuration: defaultConfigObject, delegate: nil, delegateQueue: nil)
             
         var request = NSURLRequest(URL: url!)
@@ -96,14 +85,11 @@ class PhotoDetailViewController: UIViewController {
                 }
                 else{
                     completion(results)
-                
                 }
             }
         })
         task.resume()
-        
     }
-
 }
 
 

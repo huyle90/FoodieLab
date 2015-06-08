@@ -50,39 +50,15 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     var mapView: MKMapView!
     var currentLocation: CLLocation!
     var locationArray: [CLLocation]!
-    var firstLocation: CLLocation!
-    var secondLocation: CLLocation!
-    var thirdLocation: CLLocation!
+//    var firstLocation: CLLocation!
+//    var secondLocation: CLLocation!
+//    var thirdLocation: CLLocation!
     
-    
-    //var locationMarkArray: [MKPlacemark]!
-    
-    //var currentLocationMark: MKPlacemark!
-    
-//    var sourceItem: MKMapItem!
-//    var firstDestinationItem: MKMapItem!
-//    var secondDestinationItem: MKMapItem!
-//    var thirdDestinationItem: MKMapItem!
-    
-//    var request1:MKDirectionsRequest = MKDirectionsRequest()
-//    var request2:MKDirectionsRequest = MKDirectionsRequest()
-//    var request3:MKDirectionsRequest = MKDirectionsRequest()
-//
-//    var direction1:MKDirections = MKDirections()
-//    var direction2:MKDirections = MKDirections()
-//    var direction3:MKDirections = MKDirections()
-//    
-//    var directResponse1: MKDirectionsResponse = MKDirectionsResponse()
-//    var directResponse2: MKDirectionsResponse = MKDirectionsResponse()
-//    var directResponse3: MKDirectionsResponse = MKDirectionsResponse()
-//
     var route1:MKRoute = MKRoute()
     var route2:MKRoute = MKRoute()
     var route3:MKRoute = MKRoute()
-    
     var polyLine: MKPolyline = MKPolyline()
 
-    
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
@@ -104,6 +80,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         self.placeSearchQueries = []
         self.locationArray = []
         self.placeIdArray = ""
+        
         //Search bar
         searchBar = UISearchBar()
         searchBar.frame = CGRectMake(5, 5, CGSize.screenWidth() - 50 , 50)
@@ -111,10 +88,11 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         searchBar.placeholder = "Enter your point of interest here"
         searchBar.autocapitalizationType = UITextAutocapitalizationType.Words
         self.navigationItem.titleView = searchBar
+        
         //Map view
-                mapView = MKMapView(frame: CGRect(x: myMapX, y: myMapY, width: myMapWidth, height: myMapHeight))
-            mapView.delegate = self
-                self.view.addSubview(mapView)
+        mapView = MKMapView(frame: CGRect(x: myMapX, y: myMapY, width: myMapWidth, height: myMapHeight))
+        mapView.delegate = self
+        self.view.addSubview(mapView)
         
         //Location manager
         locationManager.delegate = self
@@ -124,20 +102,18 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         
         //Search Table View
         searchTableView = UITableView()
-        self.searchTableView = UITableView(frame: CGRect(x :searchTableViewX, y: searchTableViewY, width :searchTableViewWidth, height: 100), style: UITableViewStyle.Plain)
-        //searchTableView.frame = CGRect(x: 0, y: 64, width: self.view.frame.size.width, height:0)
-
+        self.searchTableView = UITableView(frame: CGRect(x :searchTableViewX, y: searchTableViewY, width :searchTableViewWidth, height: searchTableViewHeight), style: UITableViewStyle.Plain)
         self.view.addSubview(searchTableView)
         self.searchTableView.hidden = true
         self.searchTableView.delegate = self
         self.searchTableView.dataSource = self
         self.searchTableView.alpha = 0
         
+        //Segmented Control
         var optionArray = ["By Relevance","By Distance"]
         self.segmentedControl = UISegmentedControl(items: optionArray)
         segmentedControl.frame = CGRectMake(segmentedControlX, segmentedControlY, segmentedControlWidth, segmentedControlHeight)
         self.segmentedControl.addTarget(self, action: "segmentChanged", forControlEvents: UIControlEvents.ValueChanged)
-        
         self.segmentedControl.enabled = true
         self.segmentedControl.hidden = true
         self.segmentedControl.backgroundColor = UIColor.whiteColor()
@@ -145,14 +121,12 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         self.searchType = SearchType.relevance
         self.view.addSubview(segmentedControl)
         
-      
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillShow:"), name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
-        
         
     }
     override func viewWillDisappear(animated: Bool) {
@@ -161,7 +135,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
 
     }
-    
     
     
     func keyboardWillHide(notification: NSNotification){
@@ -189,16 +162,16 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         UIView.commitAnimations()
     }
     
-    //Location manager
+    // MARK: Location manager delegate
     
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
         println(error)
         println("Errors happen")
     }
+    
     func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
         
         var userLocation: CLLocation = locations[0] as! CLLocation
-        
         locationManager.stopUpdatingLocation()
         self.currentLocation = userLocation
         
@@ -215,7 +188,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     }
     
     
-    //search bar delegate
+    // MARK: search bar delegate
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
         searchBar.becomeFirstResponder()
         searchTableView.reloadData()
@@ -249,11 +222,10 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         self.subString = searchBar.text
         return true
     }
+    
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         self.autoCompleteTimer?.invalidate()
         self.searchAutocompleteLocationsWithSubstring(self.subString)
-        //searchTableView.reloadData()
-
     }
     
     func searchAutocompleteLocationsWithSubstring(asdfaf : AnyObject){
@@ -322,7 +294,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     }
     
     
-    //Table View
+    // MARK: tableView delegate and datasource
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let identifier = "PlaceCellIdentifier"
@@ -365,8 +337,9 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
                        
                         var nextLocationPin = MKPointAnnotation()
                         nextLocationPin.coordinate = firstResult.coordinate
-                        nextLocationPin.title = "A point of interest"
-                        
+                        nextLocationPin.title = placeName
+                        nextLocationPin.subtitle = "Distance: " + (NSString(format: "%.1f", self.currentLocation.distanceFromLocation(aLocation)/1000) as String) + " Km"
+
                         if self.locationArray.count < 3 {
                             self.locationArray.append(aLocation)
                             
@@ -391,7 +364,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         }
     }
     
-    // mapView delegate
+    // MARK: mapView delegate
     func mapView(mapView: MKMapView!, rendererForOverlay overlay: MKOverlay!) -> MKOverlayRenderer! {
         if overlay is MKPolyline {
             var polylineRenderer = MKPolylineRenderer(overlay: overlay)
@@ -400,14 +373,27 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
             return polylineRenderer
         } 
         return nil
-//        var routeLineRender = MKPolylineRenderer(polyline: self.route1.polyline)
-//        routeLineRender.strokeColor = UIColor.redColor()
-//        routeLineRender.lineWidth = 5
-//        return routeLineRender
+    }
+    
+    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
+        
+        
+        var annotationView = MKPinAnnotationView(annotation:annotation, reuseIdentifier:"loc")
+        annotationView.canShowCallout = true
+        
+        annotationView.rightCalloutAccessoryView = UIButton.buttonWithType(UIButtonType.InfoDark) as! UIView
+        
+        return annotationView
+        
+    }
+    
+    func mapView(mapView: MKMapView!, annotationView view: MKAnnotationView!, calloutAccessoryControlTapped control: UIControl!) {
+        
+        var photoVC = PhotoDetailViewController()
+        photoVC.placeId = self.placeIdArray
+        self.navigationController?.pushViewController(photoVC, animated: true)
     }
 
-    
-    
     func findShortestRouteWithLocations(){
         var distance1 = self.currentLocation.distanceFromLocation(self.locationArray[0])
         var distance2 = self.currentLocation.distanceFromLocation(self.locationArray[1])
@@ -490,6 +476,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         
     }
     
+    // MARK: segmentControl
     func segmentChanged(){
         if self.segmentedControl.selectedSegmentIndex == 0 {
             self.searchType = SearchType.relevance
@@ -498,23 +485,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
             self.searchType = SearchType.distance
         }
     }
-    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
-        
-        
-        var annotationView = MKPinAnnotationView(annotation:annotation, reuseIdentifier:"loc")
-        annotationView.canShowCallout = true
-                
-        annotationView.rightCalloutAccessoryView = UIButton.buttonWithType(UIButtonType.InfoDark) as! UIView
-        
-        return annotationView
-        
-    }
-    
-    func mapView(mapView: MKMapView!, annotationView view: MKAnnotationView!, calloutAccessoryControlTapped control: UIControl!) {
 
-        var photoVC = PhotoDetailViewController()
-        photoVC.placeId = self.placeIdArray
-        self.navigationController?.pushViewController(photoVC, animated: true)
-    }
 }
 
