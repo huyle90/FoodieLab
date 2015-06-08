@@ -1,0 +1,77 @@
+__*Important note if your project doesn't use ARC*: you must add the @-fobjc-arc@ compiler flag to @SVGeocoder.m@ and @SVPlacemark.m@ in Target Settings > Build Phases > Compile Sources.__
+
+h1. SVGeocoder
+
+SVGeocoder is a simple Cocoa wrapper for the "Google Geocoding Service":http://code.google.com/apis/maps/documentation/geocoding/. It allows you to quickly geocode and reverse-geocode addresses and coordinates. It is blocked-based, uses @NSURLConnection@, ARC, as well as @NSJSONSerialization@ to automatically parse JSON responses (making it only compatible with iOS 5+). Make sure you read the Google Geocoding Service "Terms of Service":http://code.google.com/apis/maps/terms.html#section_10_12 before using SVGeocoder. 
+
+h2. Installation
+
+* Drag the @SVGeocoder/SVGeocoder@ folder into your project. 
+* Add the *CoreLocation*, *MapKit* and frameworks to your project.
+
+h2. Usage
+
+h3. Using the Geocoding API
+
+In it's simplest form, geocoding an address is as simple as:
+
+<pre>
+[SVGeocoder geocode:addressField.text
+         completion:^(NSArray *placemarks, NSHTTPURLResponse *urlResponse, NSError *error) {
+             // do something with placemarks, handle errors
+         }];
+</pre>
+
+Where @placemarks@ is an array of @SVPlacemark@ objects (see more about that below). 
+
+Additionally, you can use Google Geocoding API's @region@ parameter to fine-tune your search:
+
+<pre>
++ (SVGeocoder*)geocode:(NSString *)address bounds:(MKCoordinateRegion)bounds completion:(SVGeocoderCompletionHandler)block;
++ (SVGeocoder*)geocode:(NSString *)address region:(CLRegion *)region completion:(SVGeocoderCompletionHandler)block;
+</pre>
+
+h3. Using the Reverse Geocoding API
+
+<pre>
+[SVGeocoder reverseGeocode:CLLocationCoordinate2DMake(45.53264, -73.60518)
+                completion:^(NSArray *placemarks, NSHTTPURLResponse *urlResponse, NSError *error) {
+                    // do something with placemarks, handle errors
+                }];
+</pre>
+
+h2. About the SVPlacemark object
+
+SVPlacemark is now a simple NSObject. Here's a sample placemark returned for string "3456 Saint-Denis, Montreal":
+
+<pre>
+{
+    ISOcountryCode = CA;
+    administrativeArea = Quebec;
+    coordinate = "45.517363, -73.568376";
+    country = Canada;
+    formattedAddress = "3456 Rue Saint-Denis, Montreal, QC H2X 3L1, Canada";
+    locality = Montreal;
+    postalCode = "H2X 3L1";
+    subAdministrativeArea = "Communaut\U00e9-Urbaine-de-Montr\U00e9al";
+    subLocality = "Le Plateau-Mont-Royal";
+    subThoroughfare = 3456;
+    thoroughfare = "Rue Saint-Denis";
+}
+</pre>
+
+There's also a @region@ (@MKCoordinateRegion@) property in case the returned placemark isn't a pinned location, and a @location@ (@CLLocation@) convenience property. 
+
+h2. Google Maps API Key
+
+You can include a Google Maps API Key by setting it before every request. If the key is not used the request will not be authenticated and request limits may apply.
+
+ATTENTION: You should generate a "browser key" (without any referrer) on Google API Console to use SVGecoder this way. iOS keys won't work as they are used in the official Google SDKs only, and they use the bundle identifier to validate the request.
+
+<pre>
+[SVGeocoder setGoogleMapsAPIKey:@"KEY"];
+</pre>
+
+h2. Credits
+
+SVGeocoder is brought to you by "Sam Vermette":http://samvermette.com and "contributors to the project":https://github.com/samvermette/SVGeocoder/contributors. If you have feature suggestions or bug reports, feel free to help out by sending pull requests or by "creating new issues":https://github.com/samvermette/SVGeocoder/issues/new. If you're using SVGeocoder in your project, attribution would be nice.

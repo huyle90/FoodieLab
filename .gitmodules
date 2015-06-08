@@ -1,0 +1,6 @@
+[submodule "das-quadrat"]
+	path = das-quadrat
+	url = https://github.com/Constantine-Fry/das-quadrat.git
+[submodule "Third-party/das-quadrat"]
+	path = Third-party/das-quadrat
+	url = https://github.com/Constantine-Fry/das-quadrat.git
