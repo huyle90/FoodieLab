@@ -23,14 +23,14 @@ private let searchTableViewY : CGFloat = segmentedControlY + segmentedControlHei
 private let searchTableViewWidth : CGFloat = CGSize.screenWidth()
 private let searchTableViewHeight : CGFloat = 0
 
-private let segmentedControlX : CGFloat = 3
+private let segmentedControlX : CGFloat = 2
 private let segmentedControlY : CGFloat = 64
 private let segmentedControlWidth : CGFloat = CGSize.screenWidth() - 2*segmentedControlX
 private let segmentedControlHeight : CGFloat = 35
 
 enum SearchType {
     case relevance
-    case distance
+    case nearby
 }
 
 class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UISearchBarDelegate, UISearchControllerDelegate, UITableViewDelegate, UITableViewDataSource {
@@ -44,36 +44,29 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     private var segmentedControl: UISegmentedControl!
     private var searchType: SearchType!
     private var placeIdArray: String!
-    var placesClient: GMSPlacesClient?
     
-    var locationManager = CLLocationManager()
-    var mapView: MKMapView!
-    var currentLocation: CLLocation!
-    var locationArray: [CLLocation]!
-//    var firstLocation: CLLocation!
-//    var secondLocation: CLLocation!
-//    var thirdLocation: CLLocation!
+    private var locationManager = CLLocationManager()
+    private var mapView: MKMapView!
+    private var currentLocation: CLLocation!
+    private var locationArray: [CLLocation]!
     
-    var route1:MKRoute = MKRoute()
-    var route2:MKRoute = MKRoute()
-    var route3:MKRoute = MKRoute()
-    var polyLine: MKPolyline = MKPolyline()
+    private var route1:MKRoute = MKRoute()
+    private var route2:MKRoute = MKRoute()
+    private var route3:MKRoute = MKRoute()
+    private var polyLine: MKPolyline = MKPolyline()
 
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-
     }
     
     required init() {
         super.init(nibName: nil, bundle: nil);
-
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Foodie Lab"
         self.view.backgroundColor = UIColor.whiteColor()
-        placesClient = GMSPlacesClient()
         
         self.pastSearchResult = []
         self.pastSearchWords = []
@@ -110,7 +103,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         self.searchTableView.alpha = 0
         
         //Segmented Control
-        var optionArray = ["By Relevance","By Distance"]
+        var optionArray = ["By Relevance","Nearby"]
         self.segmentedControl = UISegmentedControl(items: optionArray)
         segmentedControl.frame = CGRectMake(segmentedControlX, segmentedControlY, segmentedControlWidth, segmentedControlHeight)
         self.segmentedControl.addTarget(self, action: "segmentChanged", forControlEvents: UIControlEvents.ValueChanged)
@@ -129,13 +122,13 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
         
     }
+    
     override func viewWillDisappear(animated: Bool) {
         super.viewWillAppear(animated)
         NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
 
     }
-    
     
     func keyboardWillHide(notification: NSNotification){
         let dictionary = notification.userInfo!
@@ -156,25 +149,21 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         frame.size.height = CGSize.screenHeight() - 64 - keyboardSize!.height
         self.searchTableView.hidden = false
         self.segmentedControl.hidden = false
-
         self.searchTableView.frame = frame
         self.searchTableView.alpha = 1
         UIView.commitAnimations()
     }
     
     // MARK: Location manager delegate
-    
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
         println(error)
         println("Errors happen")
     }
     
     func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
-        
         var userLocation: CLLocation = locations[0] as! CLLocation
         locationManager.stopUpdatingLocation()
         self.currentLocation = userLocation
-        
         let location = CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)
         let span = MKCoordinateSpan(latitudeDelta: 0.7, longitudeDelta: 0.7)
         let region = MKCoordinateRegion(center: location, span: span)
@@ -186,7 +175,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         mapView.addAnnotation(currentLocationPin)
         
     }
-    
     
     // MARK: search bar delegate
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
@@ -230,7 +218,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     
     func searchAutocompleteLocationsWithSubstring(asdfaf : AnyObject){
         self.searchTableView.reloadData()
-
         if let found = find(self.pastSearchWords, self.subString) {
             for result in self.pastSearchResult {
                 if result["keyword"] as? String == self.subString{
@@ -267,9 +254,15 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     
     func retrieveGooglePlaceInformation(searchWord : String!, completion: ([NSDictionary]?) -> ()){
         var searchWordProtection = searchWord.stringByReplacingOccurrencesOfString(" ", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-        
+        var urlString: String = ""
         if count(searchWordProtection) > 0 {
-            var urlString = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=\(searchWord)&key=AIzaSyDZeZ2BweGVdUli7hSMfljgtAYQp4RAV5U"
+            if (self.searchType == SearchType.relevance){
+                urlString = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=\(searchWord)&key=AIzaSyDZeZ2BweGVdUli7hSMfljgtAYQp4RAV5U"
+            }
+            else {
+                println(self.currentLocation.coordinate.longitude)
+                urlString = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=\(searchWord)&types=establishment&location=\(self.currentLocation.coordinate.latitude),\(self.currentLocation.coordinate.longitude)&radius=50000&key=AIzaSyDZeZ2BweGVdUli7hSMfljgtAYQp4RAV5U"
+            }
             let url = NSURL(string: urlString.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!)
             let defaultConfigObject = NSURLSessionConfiguration.defaultSessionConfiguration()
             
@@ -295,7 +288,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     
     
     // MARK: tableView delegate and datasource
-    
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let identifier = "PlaceCellIdentifier"
         var cell = tableView.dequeueReusableCellWithIdentifier(identifier) as? UITableViewCell
@@ -311,6 +303,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
     }
+    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.placeSearchQueries?.count ?? 0
     }
@@ -357,9 +350,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
                     self.findShortestRouteWithLocations()
 
                 }
-                
-                
-
             })
         }
     }
@@ -376,19 +366,14 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     }
     
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
-        
-        
         var annotationView = MKPinAnnotationView(annotation:annotation, reuseIdentifier:"loc")
         annotationView.canShowCallout = true
-        
         annotationView.rightCalloutAccessoryView = UIButton.buttonWithType(UIButtonType.InfoDark) as! UIView
         
         return annotationView
-        
     }
     
     func mapView(mapView: MKMapView!, annotationView view: MKAnnotationView!, calloutAccessoryControlTapped control: UIControl!) {
-        
         var photoVC = PhotoDetailViewController()
         photoVC.placeId = self.placeIdArray
         self.navigationController?.pushViewController(photoVC, animated: true)
@@ -399,7 +384,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         var distance2 = self.currentLocation.distanceFromLocation(self.locationArray[1])
         var distance3 = self.currentLocation.distanceFromLocation(self.locationArray[2])
         if distance1 < distance2 && distance1 < distance3 {
-            
             var distance4 = self.locationArray[0].distanceFromLocation(self.locationArray[1])
             var distance5 = self.locationArray[0].distanceFromLocation(self.locationArray[2])
             if distance4 < distance5{
@@ -409,11 +393,9 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
             else {
                 println("Best route OACB")
                 drawRouteWithPlacemarks(self.currentLocation, firstLocation: locationArray[0], secondLocation: locationArray[2], thirdLocation: locationArray[1])
-
             }
         }
         else if distance2 < distance3 && distance2 < distance1 {
-            
             var distance4 = self.locationArray[1].distanceFromLocation(self.locationArray[0])
             var distance5 = self.locationArray[1].distanceFromLocation(self.locationArray[2])
             if distance4 < distance5{
@@ -441,8 +423,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
 
             }
         }
-        
-        
     }
 
     func drawRouteWithPlacemarks(origin: CLLocation,firstLocation: CLLocation, secondLocation: CLLocation,thirdLocation: CLLocation){
@@ -457,10 +437,8 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         var secondDestinationItem = MKMapItem(placemark: secondLocationMark)
         var thirdDestinationItem = MKMapItem(placemark: thirdLocationMark)
         
-        
         var location2DCoordinateArray:[CLLocationCoordinate2D]
         location2DCoordinateArray = []
-        
         location2DCoordinateArray.append(CLLocationCoordinate2D(latitude: origin.coordinate.latitude, longitude: origin.coordinate.longitude))
         location2DCoordinateArray.append(CLLocationCoordinate2D(latitude: firstLocation.coordinate.latitude, longitude: firstLocation.coordinate.longitude))
         location2DCoordinateArray.append(CLLocationCoordinate2D(latitude: secondLocation.coordinate.latitude, longitude: secondLocation.coordinate.longitude))
@@ -482,7 +460,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
             self.searchType = SearchType.relevance
         }
         else {
-            self.searchType = SearchType.distance
+            self.searchType = SearchType.nearby
         }
     }
 

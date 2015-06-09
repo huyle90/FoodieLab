@@ -11,7 +11,7 @@ import Foundation
 private let imageViewX : CGFloat = 0
 private let imageViewY : CGFloat = (CGSize.screenHeight() - imageViewHeight)/2 + 32
 private let imageViewWidth : CGFloat = CGSize.screenWidth()
-private let imageViewHeight : CGFloat = 400
+private let imageViewHeight : CGFloat = 350
 
 class PhotoDetailViewController: UIViewController {
     var placeId: String!
@@ -31,7 +31,7 @@ class PhotoDetailViewController: UIViewController {
         self.view.backgroundColor = UIColor.whiteColor()
         
         imageView = UIImageView(frame: CGRectMake(imageViewX, imageViewY, imageViewWidth, imageViewHeight))
-        imageView.backgroundColor = UIColor.grayColor()
+        imageView.backgroundColor = UIColor.lightGrayColor()
         self.view.addSubview(imageView)
         getPhotoWithReference(self.placeId)
     }
@@ -51,7 +51,7 @@ class PhotoDetailViewController: UIViewController {
     }
     
     func getPhotoWithReference(reference: String){
-        self.retrieveGooglePlaceInformation(reference, completion: { (results) -> () in
+        self.retrieveGooglePlaceDetailInformation(reference, completion: { (results) -> () in
             if let photoDetails = results {
                 let photosArray : [NSDictionary]! = photoDetails["photos"] as? [NSDictionary]
                 if photosArray != nil {
@@ -62,11 +62,20 @@ class PhotoDetailViewController: UIViewController {
                         self.load_image(urlString)
                     }
                 }
+                else {
+                    println("No pic--------")
+                    var alert = UIAlertController(title: "Alert", message: "No picture found for this point !", preferredStyle: UIAlertControllerStyle.Alert)
+                    
+                    alert.addAction(UIAlertAction(title: "Ok", style: .Default, handler: { action in
+                        self.navigationController?.popToRootViewControllerAnimated(true)
+                    }))
+                    self.presentViewController(alert, animated: true, completion: nil)
+                }
             }
         })
     }
     
-    func retrieveGooglePlaceInformation(reference : String!, completion: (NSDictionary?) -> ()){
+    func retrieveGooglePlaceDetailInformation(reference : String!, completion: (NSDictionary?) -> ()){
         var urlString = "https://maps.googleapis.com/maps/api/place/details/json?reference=\(reference)&key=AIzaSyDZeZ2BweGVdUli7hSMfljgtAYQp4RAV5U"
         let url = NSURL(string: urlString.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!)
         let defaultConfigObject = NSURLSessionConfiguration.defaultSessionConfiguration()
