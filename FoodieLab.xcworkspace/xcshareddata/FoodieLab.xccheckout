@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>6AEAF3BB-0A80-481A-B3FC-E9B3CD413976</string>
+	<key>IDESourceControlProjectName</key>
+	<string>FoodieLab</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>707CC3BEEC5A1F3F6130174E832EF676AF4B8BF1</key>
+		<string>https://github.com/huyle90/FoodieLab.git</string>
+		<key>FE86366953AF9E081BC7A5581F96F105D72A1D38</key>
+		<string>https://github.com/TransitApp/SVGeocoder.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>FoodieLab.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>707CC3BEEC5A1F3F6130174E832EF676AF4B8BF1</key>
+		<string>..</string>
+		<key>FE86366953AF9E081BC7A5581F96F105D72A1D38</key>
+		<string>..SVGeocoder/</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/huyle90/FoodieLab.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>707CC3BEEC5A1F3F6130174E832EF676AF4B8BF1</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>707CC3BEEC5A1F3F6130174E832EF676AF4B8BF1</string>
+			<key>IDESourceControlWCCName</key>
+			<string>FoodieLab</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>FE86366953AF9E081BC7A5581F96F105D72A1D38</string>
+			<key>IDESourceControlWCCName</key>
+			<string>SVGeocoder</string>
+		</dict>
+	</array>
+</dict>
+</plist>

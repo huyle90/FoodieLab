@@ -120,11 +120,12 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         super.viewWillAppear(animated)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillShow:"), name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
+        self.searchTableView.reloadData()
         
     }
     
     override func viewWillDisappear(animated: Bool) {
-        super.viewWillAppear(animated)
+        super.viewWillDisappear(animated)
         NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
 
@@ -203,11 +204,12 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     
     func runAutocompleteWithTimer(){
         self.autoCompleteTimer?.invalidate()
-        self.autoCompleteTimer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: Selector("searchAutocompleteLocationsWithSubstring:"), userInfo: nil, repeats: false)
+        self.autoCompleteTimer = NSTimer.scheduledTimerWithTimeInterval(0.65, target: self, selector: Selector("searchAutocompleteLocationsWithSubstring:"), userInfo: nil, repeats: false)
     }
 
     func searchBar(searchBar: UISearchBar, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
         self.subString = searchBar.text
+        self.searchTableView.reloadData()
         return true
     }
     
@@ -217,7 +219,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     }
     
     func searchAutocompleteLocationsWithSubstring(asdfaf : AnyObject){
-        self.searchTableView.reloadData()
         if let found = find(self.pastSearchWords, self.subString) {
             for result in self.pastSearchResult {
                 if result["keyword"] as? String == self.subString{
@@ -226,7 +227,9 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
                     for place in places {
                         self.placeSearchQueries?.append(place)
                     }
-                    self.searchTableView.reloadData()
+                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        self.searchTableView.reloadData()
+                    })
                 }
             }
         }
@@ -238,18 +241,18 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
                     for place in places {
                         
                         self.placeSearchQueries?.append(place)
-                        if (self.searchType == SearchType.relevance){
-                        }
-                        else{
-                            
-                        }
+                        
                         let searchResult = ["keyword": self.subString, "results" : places]
                         self.pastSearchResult.append(searchResult)
-                        self.searchTableView.reloadData()
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            self.searchTableView.reloadData()
+                        })
                     }
                 }
             })
         }
+        //self.searchTableView.reloadData()
+
     }
     
     func retrieveGooglePlaceInformation(searchWord : String!, completion: ([NSDictionary]?) -> ()){
@@ -332,7 +335,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
                         nextLocationPin.coordinate = firstResult.coordinate
                         nextLocationPin.title = placeName
                         nextLocationPin.subtitle = "Distance: " + (NSString(format: "%.1f", self.currentLocation.distanceFromLocation(aLocation)/1000) as String) + " Km"
-
                         if self.locationArray.count < 3 {
                             self.locationArray.append(aLocation)
                             
@@ -463,6 +465,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
             self.searchType = SearchType.nearby
         }
     }
-
+    
+  
 }
 
